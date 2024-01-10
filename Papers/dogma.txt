@@ -1,0 +1,41 @@
+   Replication           Transcription           RNA Processing            Translation
+      |                        |                        |                        |
+      v                        v                        v                        v
+   DNA -----> DNA           DNA -----> mRNA         pre-mRNA -----> mRNA      mRNA -----> Protein
+      |                        |                        |                        |
+      v                        v                        v                        v
+ Replication            Transcription               Capping,                 Translation
+   (Duplication)             (Synthesis)            Splicing,                 (Protein
+                                                       Polyadenylation)          Synthesis)
+
+
+
+
+
+
+
+
+
+The central dogma of molecular biology describes the flow of genetic information within a biological system. The key stages of the central dogma are as follows:
+
+1. **Replication:**
+   - **Process:** The process by which DNA makes an exact copy of itself.
+   - **Significance:** Ensures that genetic information is passed on to daughter cells during cell division.
+
+2. **Transcription:**
+   - **Process:** The synthesis of messenger RNA (mRNA) from a DNA template.
+   - **Enzyme:** RNA polymerase catalyzes the synthesis of RNA using the DNA template.
+   - **Location:** In eukaryotes, transcription occurs in the nucleus.
+
+3. **RNA Processing (in eukaryotes):**
+   - **Process:** Modification of the initial mRNA transcript (pre-mRNA) before it becomes functional mRNA.
+   - **Events:** Includes capping (addition of a 5' cap), splicing (removal of introns), and polyadenylation (addition of a poly-A tail at the 3' end).
+   - **Result:** Produces mature mRNA that can be translated in the cytoplasm.
+
+4. **Translation:**
+   - **Process:** The synthesis of a polypeptide chain from the information carried by mRNA.
+   - **Site:** Takes place on ribosomes in the cytoplasm.
+   - **Transfer RNA (tRNA):** Brings amino acids to the ribosome based on the mRNA codons.
+   - **Ribosome:** The molecular machine that facilitates the coupling of tRNA anticodons with mRNA codons to build a polypeptide chain.
+
+In summary, the central dogma outlines the flow of genetic information from DNA replication to RNA transcription, and finally, to protein translation. While this flow is generally unidirectional, exceptions such as reverse transcription (seen in retroviruses) exist.
