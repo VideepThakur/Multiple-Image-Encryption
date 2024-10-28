@@ -8,10 +8,10 @@ import json
 import os
 from PyQt5.QtWidgets import QApplication, QMessageBox
 
-cred = credentials.Certificate("C:/Users/Videep/OneDrive/Documents/image_encryption.json")
+cred = credentials.Certificate("C:/Users/Videep/OneDrive/Documents/Firebase Key/key.json")
 firebase_admin.initialize_app(cred)
 
-bucket = storage.bucket(name='image-encryption-481f6.appspot.com')
+bucket = storage.bucket(name='mie-p-a6e9f.appspot.com')
 
 dna={}
 dna["00"]="A"
@@ -182,7 +182,7 @@ def decrypt_image(image_path, json_file, output_folder):
     else:
         print("Decryption failed. The decrypted image is empty.")
     
-    # Remove the password.json file from Firebase
+    #removing the password.json file from Firebase
     password_file = f"{original_filename}.json"
     delete_file_from_storage(password_file)
 
@@ -198,7 +198,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 2:
         password = sys.argv[1]
         image_path = sys.argv[2]
-        output_folder = "C:/Users/Videep/Desktop/MIE/Decrypted Images"
+        output_folder = "C:/Projects/MIE/Decrypted Images"
         password_file = f"{password}.json"
         
         if download_file_from_storage(password_file, "parameters.json"):

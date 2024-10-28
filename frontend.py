@@ -2,7 +2,7 @@ import sys
 import subprocess
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QFileDialog, QLineEdit, QLabel, QDialog
 from PyQt5.QtGui import QMovie
-from PyQt5.QtCore import QObject, QThread, pyqtSignal
+from PyQt5.QtCore import QObject, QThread, pyqtSignal, QTimer
 from PyQt5.uic import loadUi
 import json
 import os
@@ -77,6 +77,10 @@ class ImageEncryptionApp(QMainWindow):
         self.worker_thread.started.connect(self.worker.run)
         self.worker_thread.start()
 
+        self.encryption_process = None
+        self.decryption_process = None
+        self.tick_movie = None
+
     def show_folder_dialog(self):
         folder_path = QFileDialog.getExistingDirectory(self, 'Select Folder Containing Images')
 
@@ -93,10 +97,21 @@ class ImageEncryptionApp(QMainWindow):
             encr_path = os.path.join('System', 'Encryption', 'encr.py')
             upload_path = os.path.join('System', 'Encryption', 'upload.py')
 
-            subprocess.Popen(['python', encr_path, folder_path, passwords_json])
+            self.encryption_process = subprocess.Popen(['python', encr_path, folder_path, passwords_json])
 
             # Show giphy.gif while encr.py is running
             self.load_and_display_gif()
+
+            # Check for encryption process completion periodically
+            QTimer.singleShot(1000, self.check_encryption_completion)
+
+    def check_encryption_completion(self):
+        if self.encryption_process and self.encryption_process.poll() is not None:
+            # Encryption process has completed
+            self.hide_gif_label()
+        else:
+            # Encryption process is still running, check again after 1 second
+            QTimer.singleShot(1000, self.check_encryption_completion)
 
     def load_and_display_gif(self):
         if self.gif_label:
@@ -109,8 +124,21 @@ class ImageEncryptionApp(QMainWindow):
         if self.gif_label:
             self.gif_label.hide()
 
-    def hide_tick(self):
+            # Show and play tick.gif for 2 times
+            self.load_and_display_tick()
+
+    def load_and_display_tick(self):
         if self.tick:
+            self.tick.show()
+            self.tick_movie = QMovie('System/Frontend/tick.gif')
+            self.tick.setMovie(self.tick_movie)
+            self.tick_movie.start()
+
+    def hide_tick(self):
+        if self.tick_movie:
+            self.tick_movie.stop()
+            self.tick_movie.deleteLater()
+            self.tick_movie = None
             self.tick.hide()
 
     def run_decrypt_window(self):
@@ -118,10 +146,26 @@ class ImageEncryptionApp(QMainWindow):
         self.hide_gif_label()
 
         # Update the path to decryptwindow.py
-        decrypt_path = os.path.join('System', 'Decryption', 'decryptwindow.py')
-        subprocess.Popen(['python', decrypt_path])
+        # decrypt_path = os.path.join('System', 'Decryption', 'decryptwindow.py')
+        decrypt_path = "C:/Projects/MIE/System/Decryption/decryptwindow.py"
+        self.decryption_process = subprocess.Popen(['python', decrypt_path])
 
+        # Show giphy.gif while decryptwindow.py is running
         self.load_and_display_gif()
+
+        # Check for decryption process completion periodically
+        QTimer.singleShot(1000, self.check_decryption_completion)
+
+    def check_decryption_completion(self):
+        if self.decryption_process and self.decryption_process.poll() is not None:
+            # Decryption process has completed
+            self.hide_gif_label()
+            # Show and play tick.gif for 10 seconds
+            self.load_and_display_tick()
+            QTimer.singleShot(10000, self.hide_tick)
+        else:
+            # Decryption process is still running, check again after 1 second
+            QTimer.singleShot(1000, self.check_decryption_completion)
 
     def get_password(self, image_file):
         password_dialog = PasswordDialog(image_file, self)
@@ -130,17 +174,6 @@ class ImageEncryptionApp(QMainWindow):
             return password_dialog.get_password()
         else:
             return None
-
-    def load_and_display_tick(self):
-        if self.tick:
-            self.tick.show()
-            movie = QMovie('System/Frontend/tick.gif')
-            self.tick.setMovie(movie)
-            movie.start()
-
-    def hide_tick(self):
-        if self.tick:
-            self.tick.hide()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

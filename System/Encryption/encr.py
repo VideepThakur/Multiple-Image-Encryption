@@ -36,7 +36,7 @@ dna["AG"]=dna["GA"]=dna["TC"]=dna["CT"]="G"
 dna["AC"]=dna["CA"]=dna["GT"]=dna["TG"]="C"
 dna["AT"]=dna["TA"]=dna["CG"]=dna["GC"]="T"
 
-output_path="C:/Users/Videep/Desktop/MIE/System/JSON data"
+output_path="C:/Projects/MIE/System/JSON data"
 
 
 def lorenz(X, t, a, b, c):
@@ -93,6 +93,16 @@ def decompose_matrix(iname):
     #reads image data using open cv and splits data into r g b
     image = cv2.imread(iname)#image will contain in bgr sequence
     blue,green,red = split_into_rgb_channels(image) #image data will be splitted into blue green red channels
+    '''
+    B: (pixel intensity values)      G:                               R:
+    [[  0   0   0 ...  63  73  73]   [[139 140 141 ... 184 190 190]   [[213 214 215 ... 227 234 234]
+    [  0   0   0 ...  71  81  82]   [140 140 141 ... 184 190 191]   [214 214 215 ... 228 233 234]
+    [  0   0   0 ...  77  84  86]   [141 141 142 ... 176 180 182]   [215 215 214 ... 218 222 224]
+    ...                            ...                            ...
+    [  9  11  14 ...  92  96 101]   [ 20  22  25 ... 155 159 164]   [ 22  24  29 ... 188 190 195]
+    [ 14   4   6 ...  85 104 120]   [ 25  15  17 ... 148 165 181]   [ 27  17  21 ... 181 196 212]
+    [  8   1   8 ...  90 106 122]]  [ 19  12  19 ... 150 167 183]   [ 21  14  23 ... 186 198 214]]
+    '''
     for values, channel in zip((red, green, blue), (2,1,0)):
         img = np.zeros((values.shape[0], values.shape[1]), dtype = np.uint8)#empty block img will be created with the size same as the channel being processed
         img[:,:] = (values)
@@ -105,7 +115,6 @@ def decompose_matrix(iname):
     return B,G,R
 
 def dna_encode(b,g,r): 
-    
     b = np.unpackbits(b,axis=1)#converts array of integers to array of its binary values 
     g = np.unpackbits(g,axis=1)
     r = np.unpackbits(r,axis=1)
@@ -122,7 +131,7 @@ def dna_encode(b,g,r):
     m,n = b.shape
     r_enc= np.chararray((m,int(n/2))) 
     g_enc= np.chararray((m,int(n/2)))
-    b_enc= np.chararray((m,int(n/2)))#encodes binary values into dna sequences 
+    b_enc= np.chararray((m,int(n/2)))
     
     for color,enc in zip((b,g,r),(b_enc,g_enc,r_enc)):
         idx=0
@@ -134,17 +143,27 @@ def dna_encode(b,g,r):
                     idx=0
                     break
     
-    b_enc=b_enc.astype(str)
+    b_enc=b_enc.astype(str) #converting to string type
     g_enc=g_enc.astype(str)
     r_enc=r_enc.astype(str)
     return b_enc,g_enc,r_enc
+    '''
+            Encoded Blue Channel:
+            [[b'A' b'A' b'A' ... b'A' b'G' b'T']
+            [b'A' b'A' b'A' ... b'T' b'A' b'G']
+            [b'A' b'A' b'A' ... b'T' b'T' b'G']
+            ...
+            [b'A' b'A' b'G' ... b'G' b'T' b'T']
+            [b'A' b'A' b'C' ... b'C' b'G' b'A']
+            [b'A' b'A' b'G' ... b'C' b'G' b'G']]
+    '''
 
 def key_matrix_encode(key,b): 
     #creates encoded matrix based on key and blue unlike previous one
-    b = np.unpackbits(b,axis=1)
+    b = np.unpackbits(b,axis=1) #just to get the size
     m,n = b.shape
-    key_bin = bin(int(key, 16))[2:].zfill(256)
-    Mk = np.zeros((m,n),dtype=np.uint8)
+    key_bin = bin(int(key, 16))[2:].zfill(256) #converting to 256 bits
+    Mk = np.zeros((m,n),dtype=np.uint8) #initializing array with zeroes
     x=0
     for j in range(0,m):
             for i in range(0,n):
@@ -160,8 +179,18 @@ def key_matrix_encode(key,b):
             Mk_enc[j,idx]=dna["{0}{1}".format(Mk[j,i],Mk[j,i+1])]
             idx+=1
     Mk_enc=Mk_enc.astype(str)
+    '''
+    Encoded matrix MK_enc:
+        [['T' 'T' 'C' ... 'G' 'T' 'G']
+        ['G' 'T' 'T' ... 'T' 'G' 'G']
+        ['G' 'G' 'C' ... 'A' 'T' 'T']
+        ...
+        ['A' 'T' 'G' ... 'C' 'G' 'T']
+        ['A' 'A' 'T' ... 'A' 'T' 'C']
+        ['A' 'G' 'T' ... 'C' 'A' 'A']]
+    '''
     return Mk_enc
-
+    
 def xor_operation(b,g,r,mk):
     #does xor operation between dna encoded rgb channels and encoded key matrix 
     m,n = b.shape
@@ -193,6 +222,16 @@ def xor_operation(b,g,r,mk):
     bx=bx.astype(str)
     gx=gx.astype(str)
     rx=rx.astype(str)
+    '''
+    blue final :
+        [['T' 'T' 'C' ... 'G' 'C' 'C']
+        ['G' 'T' 'T' ... 'A' 'G' 'A']
+        ['G' 'G' 'C' ... 'T' 'A' 'C']
+        ...
+        ['A' 'T' 'A' ... 'T' 'C' 'A']
+        ['A' 'A' 'G' ... 'C' 'C' 'C']
+        ['A' 'G' 'C' ... 'A' 'G' 'G']]
+    '''
     return bx,gx,rx 
 
 def gen_chaos_seq(m,n):
@@ -224,8 +263,8 @@ def sequence_indexing(x,y,z):
     n=len(x)
     fx=np.zeros((n),dtype=np.uint32)
     fy=np.zeros((n),dtype=np.uint32)
-    fz=np.zeros((n),dtype=np.uint32)
-    seq=sorted(x)
+    fz=np.zeros((n),dtype=np.uint32) 
+    seq=sorted(x)  #[2,1,9,5,7]-->x [1,2,5,7,9]-->seq
     for k1 in range(0,n):
             t = x[k1]
             k2 = bsearch(seq, t)
@@ -246,6 +285,10 @@ def scramble(fx,fy,fz,b,r,g):
     #scrambles rgb channels
     p,q=b.shape
     size = p*q
+    '''b = [[1, 2],
+           [3, 4]]
+        bx = [1, 2, 3, 4]
+    '''
     bx=b.reshape(size).astype(str)
     gx=g.reshape(size).astype(str)
     rx=r.reshape(size).astype(str)
@@ -307,7 +350,9 @@ def recover_image(b, g, r, file_path, password, output_path):
     img[:, :, 2] = r
     img[:, :, 1] = g
     img[:, :, 0] = b
-    encrypted_images_dir = "C:/Users/Videep/Desktop/MIE/Encrypted Images"  # Replace with your specific path
+    # encrypted_images_dir = "C:/Users/Videep/OneDrive/Documents/Projects/MIE/Encrypted Images"  # Replace with your specific path
+    encrypted_images_dir = "C:\Projects\MIE\Encrypted Images"
+
     os.makedirs(encrypted_images_dir, exist_ok=True)  # Ensure the directory exists
     output_file_path = os.path.join(encrypted_images_dir, os.path.splitext(os.path.basename(file_path))[0] + ".png")
     cv2.imwrite(output_file_path, img)
@@ -333,6 +378,8 @@ def process_images_in_folder(folder_path, passwords_array):
     counter = 0
 
     def process_image(file_path, password):
+        encr_dir = os.path.dirname(os.path.abspath(__file__))
+        os.chdir(encr_dir)
         print(f"Processing image: {file_path} with password: {password}")
         nonlocal counter
         key, m, n = securekey(file_path)
@@ -349,22 +396,14 @@ def process_images_in_folder(folder_path, passwords_array):
 
         save_encryption_info(file_path, fx, fy, fz, Mk_e, red, password, output_path)
 
-        # Construct the path for the JSON file created during runtime
         json_file_name = f"{password}.json"
         json_file_path_runtime = os.path.join(output_path, json_file_name)
         json_file_path_runtime = os.path.normpath(json_file_path_runtime)
 
-        # Call the upload script with the dynamically generated JSON file path
-        upload_command = f"python \"{os.path.join(os.path.dirname(__file__), 'upload.py')}\" \"{json_file_path_runtime}\" \"{output_path}\""
-        subprocess.run(upload_command, shell=True, cwd=output_path)  # Set the current working directory to output_path
-
-        # Permanently delete the JSON file
-        # try:
-        #     os.remove(json_file_path_runtime)
-        #     print(f"Deleted JSON file: {json_file_path_runtime}")
-        # except FileNotFoundError:
-        #     print(f"File not found: {json_file_path_runtime}")
-
+        # upload_command = f"python \"{os.path.join(os.path.dirname(__file__), 'upload.py')}\" \"{json_file_path_runtime}\" \"{output_path}\""
+        # subprocess.run(upload_command, shell=True, cwd=output_path)  
+        upload_command = f"python upload.py \"{json_file_path_runtime}\" \"{output_path}\""
+        subprocess.run(upload_command, shell=True)
         counter += 1
 
     for file_name, password in passwords_array:
@@ -378,7 +417,6 @@ def process_images_in_folder(folder_path, passwords_array):
 
     for thread in threads:
         thread.join()
-
     print("All images processed successfully.")
 
 if __name__ == "__main__":

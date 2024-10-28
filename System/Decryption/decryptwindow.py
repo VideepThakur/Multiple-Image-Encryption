@@ -18,6 +18,12 @@ class ImageEncryptionWindow(QMainWindow):
         self.button.clicked.connect(self.get_image_path)
         layout.addWidget(self.button)
 
+        self.setStyleSheet("QDialog { background-color: #f5f5f5; }"
+                           "QLabel { font-size: 14px; }"
+                           "QLineEdit { background-color: #ffffff; font-size: 14px; border: 1px solid #dcdcdc; padding: 3px; }"
+                           "QPushButton { background-color: #4CAF50; color: white; border: none; padding: 5px 10px; font-size: 14px; }"
+                           "QPushButton:hover { background-color: #45a049; }")
+
         self.password_label = QLabel("Enter Password:")
         layout.addWidget(self.password_label)
 
@@ -34,7 +40,6 @@ class ImageEncryptionWindow(QMainWindow):
 
     def get_image_path(self):
         options = QFileDialog.Options()
-        options |= QFileDialog.DontUseNativeDialog
         encrypted_image_path, _ = QFileDialog.getOpenFileName(self, "Select Encrypted Image", "", "Images (*.png *.jpg *.jpeg *.bmp *.gif)", options=options)
         if encrypted_image_path:
             print("Selected Encrypted Image Path:", encrypted_image_path)
@@ -50,7 +55,7 @@ class ImageEncryptionWindow(QMainWindow):
             print("Please select an encrypted image first.")
 
     def run_decryption_script(self, password, image_path):
-        decrypt_script_path = "C:\\Users\\Videep\\Desktop\\MIE\\System\\Decryption\\decrypt.py"  # Update this with the correct path
+        decrypt_script_path = "C:/Projects/MIE/System/Decryption/decrypt.py"
         try:
             subprocess.run(["python", decrypt_script_path, password, image_path], check=True)
         except subprocess.CalledProcessError as e:
